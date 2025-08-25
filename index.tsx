@@ -9,6 +9,6 @@ await render(() => <App />, {
     position: ConsolePosition.BOTTOM,
     maxStoredLogs: 1000,
     sizePercent: 40,
-    startInDebugMode: false,
+    startInDebugMode: true,
   },
 });

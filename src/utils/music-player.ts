@@ -242,17 +242,9 @@ class MusicPlayer {
     }
   }
 
-  resume(): void {
-    if (this.currentFile && !this.isPlaying) {
-      this.play(this.currentFile);
-    }
-  }
-
   togglePlayPause(): void {
     if (this.isPlaying) {
-      this.pause();
-    } else {
-      this.resume();
+      this.stop();
     }
   }
 }

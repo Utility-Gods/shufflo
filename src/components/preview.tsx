@@ -46,8 +46,14 @@ export function Preview(props: PreviewProps) {
 
       <text>
         {cyan(
-          `${props.currentSongStatus().metadata?.year || ""}${props.currentSongStatus().metadata?.duration ? ` • ${Math.floor(props.currentSongStatus().metadata.duration / 60)}:${String(Math.floor(props.currentSongStatus().metadata.duration % 60)).padStart(2, "0")}` : ""}`,
+          `${props.currentSongStatus().metadata?.year || ""}${props.currentSongStatus().metadata?.duration ? ` • ${Math.floor(props.currentSongStatus().metadata.duration / 60)}:${String(Math.floor(props.currentSongStatus().metadata.duration % 60)).padStart(2, "0")}` : ""}`
         )}
+      </text>
+
+      <text>
+        {props.currentSongStatus().elapsedTime !== undefined ? 
+          white(`${Math.floor(props.currentSongStatus().elapsedTime! / 60)}:${String(Math.floor(props.currentSongStatus().elapsedTime! % 60)).padStart(2, "0")}`) : ""
+        }
       </text>
 
       <box

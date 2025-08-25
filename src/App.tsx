@@ -1,3 +1,3 @@
-import InputScene from "./components/home";
+import RootScene from "./components/home";
 
-export const App = () => <InputScene />;
+export const App = () => <RootScene />;

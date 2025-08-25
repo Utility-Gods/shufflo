@@ -201,14 +201,11 @@ const HomeScene = () => {
 
     setCurrentSongIndex(index);
 
-    // Start playing and immediately render album art
     const playPromise = musicPlayer.play(path.join(MUSIC_DIR, song));
 
-    // Update status immediately
     const status = musicPlayer.getStatus();
     setCurrentSongStatus(status);
 
-    // Try to get and render album art immediately
     const base64Art = musicPlayer.getAlbumArtBase64();
     if (base64Art && scene && threeRenderer && framebufferRenderable) {
       try {
@@ -234,10 +231,8 @@ const HomeScene = () => {
       }
     }
 
-    // Wait for play to complete
     await playPromise;
 
-    // Update status again after play completes
     const finalStatus = musicPlayer.getStatus();
     setCurrentSongStatus(finalStatus);
   }
@@ -273,13 +268,19 @@ const HomeScene = () => {
     playTrack(originalIndex);
   }
   return (
-    <box height={4}>
+    <box
+      borderColor={"green"}
+      focusedBorderColor={"green"}
+      title="Shufflo"
+      titleAlignment="center"
+      borderStyle="heavy"
+    >
       <text>
         {green("Search: ")} {yellow(nameValue())}
       </text>
-      <input  onInput={(value) => setNameValue(value)} />
+      <input onInput={(value) => setNameValue(value)} />
 
-      <Preview 
+      <Preview
         currentSongStatus={currentSongStatus}
         onPlayPause={() => {
           musicPlayer.togglePlayPause();
@@ -289,11 +290,7 @@ const HomeScene = () => {
         onPrevious={playPrevious}
       />
 
-      <SongList 
-        files={files}
-        nameValue={nameValue}
-        onSelect={handleSelect}
-      />
+      <SongList files={files} nameValue={nameValue} onSelect={handleSelect} />
     </box>
   );
 };

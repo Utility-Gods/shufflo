@@ -41,6 +41,7 @@ class MusicPlayer {
   private currentMetadata: SongMetadata | null = null;
   private startTime: Date | null = null;
   private platform: NodeJS.Platform = process.platform;
+  private volume: number = 0;
 
   async play(filePath: string): Promise<void> {
     // Stop current song if playing
@@ -137,7 +138,7 @@ class MusicPlayer {
         });
       case "linux":
         console.log("Using ffplay for Linux...");
-        return Bun.spawn(["ffplay", "-nodisp", "-autoexit", filePath], {
+        return Bun.spawn(["ffplay", "-nodisp", "-autoexit", "-af", `volume=${this.volume}`, filePath], {
           stdout: "ignore",
           stderr: "ignore",
         });
@@ -246,6 +247,10 @@ class MusicPlayer {
     if (this.isPlaying) {
       this.stop();
     }
+  }
+
+  setVolume(volume: number): void {
+    this.volume = Math.max(0, Math.min(1, volume));
   }
 }
 

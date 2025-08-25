@@ -7,6 +7,7 @@ const InputScene = () => {
 
   onMount(() => {
     renderer.useConsole = true;
+    renderer.setBackgroundColor(RGBA.fromHex("#dde"));
   });
 
   const [nameValue, setNameValue] = createSignal("Sid");

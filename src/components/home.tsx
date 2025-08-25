@@ -17,6 +17,8 @@ import {
   green,
   FrameBufferRenderable,
 } from "@opentui/core";
+import { Preview } from "./preview";
+import { SongList } from "./song-list";
 import { ThreeCliRenderer } from "@opentui/core/3d";
 import * as THREE from "three";
 import {
@@ -273,153 +275,25 @@ const HomeScene = () => {
   return (
     <box height={4}>
       <text>
-        {fg("#adff2f")("Search: ")} {fg("#ff8c00")(nameValue())}
+        {green("Search: ")} {yellow(nameValue())}
       </text>
-      <input focused onInput={(value) => setNameValue(value)} />
+      <input  onInput={(value) => setNameValue(value)} />
 
-      <box
-        style={{
-          position: "absolute",
-          right: 2,
-          top: 1,
-          width: 28,
-          height: 30,
-          backgroundColor: "#1a1a1a",
-          borderColor: "#444444",
-          borderStyle: "single",
+      <Preview 
+        currentSongStatus={currentSongStatus}
+        onPlayPause={() => {
+          musicPlayer.togglePlayPause();
+          setCurrentSongStatus(musicPlayer.getStatus());
         }}
-      >
-        {/* Header */}
-        <text>{fg("#adff2f")("Now Playing")}</text>
+        onNext={playNext}
+        onPrevious={playPrevious}
+      />
 
-        {/* Album Art Area (space for the 3D framebuffer) */}
-        <box
-          style={{
-            width: 20,
-            height: 18,
-            backgroundColor: "#333333",
-            marginTop: 1,
-            left: 2,
-          }}
-        />
-
-        {/* Song Info */}
-        <text>
-          {t`${bold(fg("#ff8c00")(currentSongStatus().metadata?.title?.substring(0, 22) || "No song selected"))}`}
-        </text>
-
-        <text>
-          {t`${italic(fg("#adff2f")(currentSongStatus().metadata?.artist?.substring(0, 22) || ""))}`}
-        </text>
-
-        <text>
-          {fg("#ff8c00")(
-            currentSongStatus().metadata?.album?.substring(0, 22) || "",
-          )}
-        </text>
-
-        <text>
-          {fg("#888888")(
-            `${currentSongStatus().metadata?.year || ""}${currentSongStatus().metadata?.duration ? ` • ${Math.floor(currentSongStatus().metadata.duration / 60)}:${String(Math.floor(currentSongStatus().metadata.duration % 60)).padStart(2, "0")}` : ""}`,
-          )}
-        </text>
-
-        {/* Control Buttons */}
-        <box
-          style={{
-            flexDirection: "row",
-            marginTop: 1,
-            justifyContent: "center",
-          }}
-        >
-          <box
-            style={{
-              width: 4,
-              height: 2,
-              backgroundColor: "#333333",
-              borderColor: "#666666",
-              borderStyle: "single",
-              marginRight: 1,
-            }}
-            onMouseDown={() => {
-              playPrevious();
-            }}
-          >
-            <text>{fg("#ffffff")("⏮")}</text>
-          </box>
-
-          <box
-            style={{
-              width: 4,
-              height: 2,
-              backgroundColor: "#333333",
-              borderColor: "#666666",
-              borderStyle: "single",
-            }}
-            onMouseDown={() => {
-              musicPlayer.togglePlayPause();
-              setCurrentSongStatus(musicPlayer.getStatus());
-            }}
-          >
-            <text>
-              {fg("#ffffff")(currentSongStatus().isPlaying ? "⏸" : "▶")}
-            </text>
-          </box>
-
-          <box
-            style={{
-              width: 4,
-              height: 2,
-              backgroundColor: "#333333",
-              borderColor: "#666666",
-              borderStyle: "single",
-            }}
-            onMouseDown={() => {
-              playNext();
-            }}
-          >
-            <text>{fg("#ffffff")("⏭")}</text>
-          </box>
-        </box>
-      </box>
-
-      <box
-        title={`Songs (${files()?.filter((x) => x.includes(nameValue()))?.length || 0})`}
-        style={{
-          flexGrow: 1,
-          marginTop: 1,
-          borderStyle: "single",
-          titleAlignment: "center",
-          borderColor: "#f85149",
-        }}
-      >
-        <Show when={files()}>
-          <select
-            focused
-            onSelect={(index) => {
-              handleSelect(index);
-            }}
-            options={files()
-              ?.filter((x) => x.includes(nameValue()))
-              ?.map((ex, i) => ({
-                name: ex,
-                description: ex,
-                value: i,
-              }))}
-            style={{
-              height: 30,
-              backgroundColor: "transparent",
-              focusedBackgroundColor: "transparent",
-              selectedBackgroundColor: "#334455",
-              selectedTextColor: "#adff2f",
-              showDescription: false,
-            }}
-            showScrollIndicator
-            wrapSelection
-            fastScrollStep={5}
-          />
-        </Show>
-      </box>
+      <SongList 
+        files={files}
+        nameValue={nameValue}
+        onSelect={handleSelect}
+      />
     </box>
   );
 };

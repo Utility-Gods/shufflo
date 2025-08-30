@@ -1,7 +1,8 @@
 import { Show } from "solid-js";
+import type { FileEntry } from "../types";
 
 interface SongListProps {
-  files: () => string[] | undefined;
+  files: () => FileEntry[] | undefined;
   nameValue: () => string;
   onSelect: (index: number) => void;
 }
@@ -9,7 +10,7 @@ interface SongListProps {
 export function SongList(props: SongListProps) {
   return (
     <box
-      title={`Songs (${props.files()?.filter((x) => x.includes(props.nameValue()))?.length || 0})`}
+      title={`Songs (${props.files()?.filter((x) => x.name.includes(props.nameValue()))?.length || 0})`}
       style={{
         flexGrow: 1,
         borderStyle: "single",
@@ -20,11 +21,12 @@ export function SongList(props: SongListProps) {
         <select
           focused
           onSelect={props.onSelect}
-          options={props.files()
-            ?.filter((x) => x.includes(props.nameValue()))
+          options={props
+            .files()
+            ?.filter((x) => x.name.includes(props.nameValue()))
             ?.map((ex, i) => ({
-              name: ex,
-              description: ex,
+              name: ex.name,
+              description: ex.fullPath,
               value: i,
             }))}
           style={{

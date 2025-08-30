@@ -2,29 +2,6 @@ import { Effect } from "effect";
 import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import type { FileEntry } from "./types";
-import { file } from "bun";
-
-const AUDIO_EXTENSIONS = [
-  ".mp3",
-  ".flac",
-  ".wav",
-  ".m4a",
-  ".aac",
-  ".ogg",
-  ".wma",
-  ".opus",
-  ".aiff",
-  ".aif",
-  ".dsf",
-  ".dff",
-  ".atff",
-  ".mp4",
-  ".3gp",
-  ".amr",
-  ".ape",
-  ".au",
-  ".ra",
-];
 
 export async function scanDir(dir: string): Promise<string[]> {
   const files: string[] = [];
@@ -79,11 +56,11 @@ export async function scanDir(dir: string): Promise<string[]> {
 export function readDirectory(dirPath: string) {
   return Effect.tryPromise({
     try: async () => {
-      const entries = await readdir(dirPath);
+      const entries = await readdir(dirPath, {});
       const fileEntries: FileEntry[] = [];
 
-      console.log(`Reading directory: ${dirPath}`, entries.length);
       for (const entry of entries) {
+        console.log(entry);
         try {
           if (entry.startsWith(".")) continue;
 
@@ -91,12 +68,12 @@ export function readDirectory(dirPath: string) {
 
           const stats = await Bun.file(fullPath).stat();
           console.log(`Found file: ${fullPath}`, stats);
-          const isDirectory = stats.isDirectory;
+          const isDirectory = stats.isDirectory();
 
           fileEntries.push({
             name: entry,
             fullPath,
-            isDirectory: isDirectory(),
+            isDirectory,
           });
         } catch (e) {
           console.error(`Error reading fil`, e);

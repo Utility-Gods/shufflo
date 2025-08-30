@@ -1,5 +1,5 @@
 import { useRenderer } from "@opentui/solid";
-import { onMount, createSignal, createResource, Show } from "solid-js";
+import { onMount, createSignal, createResource, Show, createEffect } from "solid-js";
 import { green, yellow, cyan } from "@opentui/core";
 import { SongList } from "./components/song-list";
 import { Preview } from "./components/preview";
@@ -20,6 +20,9 @@ export const App = () => {
     }),
   );
 
+  createEffect(() => {
+    console.log("Effect running...", files());
+  },files)
   onMount(() => {
     renderer.useConsole = true;
     renderer.console.show();

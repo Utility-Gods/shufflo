@@ -39,7 +39,7 @@ const HomeScene = () => {
 
   onMount(async () => {
     renderer.useConsole = true;
-    renderer.setBackgroundColor(RGBA.fromHex("#334455"));
+    renderer.setBackgroundColor("#334455");
 
     const cleanup = async () => {
       console.log("Cleaning up music processes...");
@@ -152,17 +152,21 @@ const HomeScene = () => {
       <input onInput={(value) => setNameValue(value)} />
 
       <box style={{ flexDirection: "row", flexGrow: 1, marginTop: 1 }}>
-        <SongList files={files} nameValue={nameValue} onSelect={handleSelect} />
-        <Preview
-          currentSongStatus={currentSongStatus}
-          onPlayPause={() => {
-            musicPlayer.togglePlayPause();
-            setCurrentSongStatus(musicPlayer.getStatus());
-          }}
-          onNext={playNext}
-          onPrevious={playPrevious}
-          albumArtBase64={albumArtBase64()}
-        />
+        <box style={{ flexGrow: 1, flexShrink: 1, flexBasis: 70, marginRight: 1 }}>
+          <SongList files={files} nameValue={nameValue} onSelect={handleSelect} />
+        </box>
+        <box style={{ flexBasis: 30, flexShrink: 0, flexGrow: 0, borderStyle: "single" }}>
+          <Preview
+            currentSongStatus={currentSongStatus}
+            onPlayPause={() => {
+              musicPlayer.togglePlayPause();
+              setCurrentSongStatus(musicPlayer.getStatus());
+            }}
+            onNext={playNext}
+            onPrevious={playPrevious}
+            albumArtBase64={albumArtBase64()}
+          />
+        </box>
       </box>
     </box>
   );

@@ -12,8 +12,6 @@ export function SongList(props: SongListProps) {
       title={`Songs (${props.files()?.filter((x) => x.includes(props.nameValue()))?.length || 0})`}
       style={{
         flexGrow: 1,
-        flexShrink: 1,
-        flexBasis: 70,
         borderStyle: "single",
         titleAlignment: "center",
       }}

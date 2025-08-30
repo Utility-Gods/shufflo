@@ -2,8 +2,8 @@ import { createSignal, createResource, Show } from "solid-js";
 import { green, yellow, cyan } from "@opentui/core";
 import { Effect, Console, pipe } from "effect";
 import path from "path";
-import { readDirectory } from "../files";
-import type { FileSelectorProps } from "../types";
+import { readDirectory } from "../lib/io/files";
+import type { FileSelectorProps } from "../lib/types";
 
 export function FileSelector(props: FileSelectorProps) {
   const [currentPath, setCurrentPath] = createSignal(
@@ -24,10 +24,8 @@ export function FileSelector(props: FileSelectorProps) {
     const selected = fileList[index];
 
     if (selected.isDirectory) {
-      // Navigate into directory
       setCurrentPath(selected.fullPath);
     } else {
-      // If it's a file, select the parent directory
       props.onDirectorySelect(path.dirname(selected.fullPath));
     }
   };
@@ -39,6 +37,12 @@ export function FileSelector(props: FileSelectorProps) {
     }
   };
 
+  const goBack = () => {
+    const parent = path.dirname(currentPath());
+    if (parent !== currentPath()) {
+      setCurrentPath(parent);
+    }
+  };
   const selectCurrentDirectory = () => {
     props.onDirectorySelect(currentPath());
   };
@@ -89,4 +93,3 @@ export function FileSelector(props: FileSelectorProps) {
     </box>
   );
 }
-

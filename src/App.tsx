@@ -1,28 +1,47 @@
 import { useRenderer } from "@opentui/solid";
-import { onMount, createSignal, createResource, Show, createEffect } from "solid-js";
+import {
+  onMount,
+  createSignal,
+  createResource,
+  Show,
+  Match,
+  createEffect,
+  Switch,
+} from "solid-js";
+
 import { green, yellow, cyan } from "@opentui/core";
+
+import { Console, Effect, pipe } from "effect";
+
 import { SongList } from "./components/song-list";
 import { Preview } from "./components/preview";
 import { FileSelector } from "./components/file-selector";
-import { readDirectory } from "./files";
-import { Console, Effect, pipe } from "effect";
+import Profile from "./components/profile";
+import { readDirectory } from "./lib/io/files";
 
 export const App = () => {
   const renderer = useRenderer();
   const [nameValue, setNameValue] = createSignal("");
   const [musicDirectory, setMusicDirectory] = createSignal<string | null>(null);
 
+  const tabs = [
+    { title: "Songs" },
+    { title: "Choose Directory" },
+    { title: "Profile" },
+  ];
+
   const [files] = createResource(musicDirectory, (path) =>
     Effect.runPromise(
       pipe(readDirectory(path), Effect.tapError(Console.error)),
     ).catch((e) => {
       console.error("Error reading directory:", e);
+      return [];
     }),
   );
 
   createEffect(() => {
     console.log("Effect running...", files());
-  },files)
+  }, files);
   onMount(() => {
     renderer.useConsole = true;
     renderer.console.show();
@@ -42,6 +61,8 @@ export const App = () => {
     setNameValue("");
   };
 
+  const [activeTab, setActiveTab] = createSignal(0);
+
   return (
     <box
       borderColor={"green"}
@@ -50,51 +71,80 @@ export const App = () => {
       titleAlignment="center"
       borderStyle="heavy"
     >
-      <Show
-        when={musicDirectory()}
-        fallback={<FileSelector onDirectorySelect={handleDirectorySelect} />}
-      >
-        <box style={{ flexDirection: "row", marginBottom: 1 }}>
+      <tab_select
+        height={2}
+        width="100%"
+        options={tabs.map((tab, index) => ({
+          name: tab.title,
+          value: index,
+          description: "",
+        }))}
+        showDescription={false}
+        onChange={(index) => {
+          setActiveTab(index);
+        }}
+        focused
+      />
+      <Switch>
+        <Match when={activeTab() === 0}>
+          <box style={{ flexDirection: "row", marginBottom: 1 }}>
+            <text>
+              {cyan("Directory: ")} {musicDirectory()}
+            </text>
+            <text onMouseDown={resetDirectory} style={{ marginLeft: 2 }}>
+              {yellow("← Change Directory")}
+            </text>
+          </box>
           <text>
-            {cyan("Directory: ")} {musicDirectory()}
+            {green("Search: ")} {yellow(nameValue())}
           </text>
-          <text onMouseDown={resetDirectory} style={{ marginLeft: 2 }}>
-            {yellow("← Change Directory")}
+          <input onInput={(value) => setNameValue(value)} />
+          <box style={{ flexDirection: "row", flexGrow: 1, marginTop: 1 }}>
+            <box
+              style={{
+                flexGrow: 1,
+                flexShrink: 1,
+                flexBasis: 70,
+                marginRight: 1,
+              }}
+            >
+              <SongList
+                files={files}
+                nameValue={nameValue}
+                onSelect={handleSongSelect}
+              />
+            </box>
+            <box
+              style={{
+                flexBasis: 30,
+                flexShrink: 0,
+                flexGrow: 0,
+                borderStyle: "single",
+              }}
+            >
+              <Preview />
+            </box>
+          </box>
+          <text>
+            Tab 1/6 - Use Left/Right arrows to navigate | Press Ctrl+C to exit |
+            D: toggle debug
           </text>
-        </box>
-
-        <text>
-          {green("Search: ")} {yellow(nameValue())}
-        </text>
-        <input onInput={(value) => setNameValue(value)} />
-
-        <box style={{ flexDirection: "row", flexGrow: 1, marginTop: 1 }}>
-          <box
-            style={{
-              flexGrow: 1,
-              flexShrink: 1,
-              flexBasis: 70,
-              marginRight: 1,
-            }}
-          >
-            <SongList
-              files={files}
-              nameValue={nameValue}
-              onSelect={handleSongSelect}
-            />
-          </box>
-          <box
-            style={{
-              flexBasis: 30,
-              flexShrink: 0,
-              flexGrow: 0,
-              borderStyle: "single",
-            }}
-          >
-            <Preview />
-          </box>
-        </box>
-      </Show>
+        </Match>
+        <Match when={activeTab() === 1}>
+          <FileSelector onDirectorySelect={handleDirectorySelect} />
+          <text>
+            Tab 2/6 - Use Left/Right arrows to navigate | Press Ctrl+C to exit |
+            D: toggle debug
+          </text>
+        </Match>
+        <Match when={activeTab() === 2}>
+          <text>
+            Tab 3/6 - Use Left/Right arrows to navigate | Press Ctrl+C to exit |
+            D: toggle debug
+          </text>
+          <Profile />
+        </Match>
+      </Switch>
     </box>
   );
 };

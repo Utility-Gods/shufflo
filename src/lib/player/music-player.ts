@@ -2,7 +2,7 @@ import { $ } from "bun";
 import type { Subprocess } from "bun";
 import * as mm from "music-metadata";
 import type { IAudioMetadata, IPicture } from "music-metadata";
-import type { AlbumArt, PlayerStatus, SongMetadata } from "./types";
+import type { AlbumArt, PlayerStatus, SongMetadata } from "../types";
 
 class MusicPlayer {
   private currentProcess: Subprocess | null = null;

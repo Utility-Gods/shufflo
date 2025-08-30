@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
-import type { FileEntry } from "./types";
+import type { FileEntry } from "../types";
 
 export async function scanDir(dir: string): Promise<string[]> {
   const files: string[] = [];

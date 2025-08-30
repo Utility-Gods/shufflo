@@ -1,5 +1,5 @@
 import { Show } from "solid-js";
-import type { FileEntry } from "../types";
+import type { FileEntry } from "../lib/types";
 
 interface SongListProps {
   files: () => FileEntry[] | undefined;

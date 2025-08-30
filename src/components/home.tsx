@@ -1,26 +1,12 @@
 import { useRenderer, useKeyHandler } from "@opentui/solid";
-import {
-  createResource,
-  createSignal,
-  onMount,
-  Show,
-  onCleanup,
-} from "solid-js";
-import {
-  RGBA,
-  bold,
-  t,
-  fg,
-  italic,
-  yellow,
-  cyan,
-  green,
-} from "@opentui/core";
+import { createResource, createSignal, onMount, onCleanup } from "solid-js";
+import { yellow, green } from "@opentui/core";
 import { Preview } from "./preview";
 import { SongList } from "./song-list";
 import path from "path";
-import { scanDir } from "../utils/files";
-import { MusicPlayer, type PlayerStatus } from "../utils/music-player";
+import { scanDir } from "../lib/files";
+import { MusicPlayer } from "../lib/music-player";
+import type { PlayerStatus } from "../lib/types";
 
 const MUSIC_DIR = "/media/d2du/d2du/music/songs/complete";
 
@@ -152,10 +138,23 @@ const HomeScene = () => {
       <input onInput={(value) => setNameValue(value)} />
 
       <box style={{ flexDirection: "row", flexGrow: 1, marginTop: 1 }}>
-        <box style={{ flexGrow: 1, flexShrink: 1, flexBasis: 70, marginRight: 1 }}>
-          <SongList files={files} nameValue={nameValue} onSelect={handleSelect} />
+        <box
+          style={{ flexGrow: 1, flexShrink: 1, flexBasis: 70, marginRight: 1 }}
+        >
+          <SongList
+            files={files}
+            nameValue={nameValue}
+            onSelect={handleSelect}
+          />
         </box>
-        <box style={{ flexBasis: 30, flexShrink: 0, flexGrow: 0, borderStyle: "single" }}>
+        <box
+          style={{
+            flexBasis: 30,
+            flexShrink: 0,
+            flexGrow: 0,
+            borderStyle: "single",
+          }}
+        >
           <Preview
             currentSongStatus={currentSongStatus}
             onPlayPause={() => {

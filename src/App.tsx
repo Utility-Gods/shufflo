@@ -4,16 +4,19 @@ import { green, yellow, cyan } from "@opentui/core";
 import { SongList } from "./components/song-list";
 import { Preview } from "./components/preview";
 import { FileSelector } from "./components/file-selector";
-import { scanDir } from "./utils/files";
+import { scanDir } from "./lib/files";
 
 export const App = () => {
   const renderer = useRenderer();
   const [nameValue, setNameValue] = createSignal("");
   const [musicDirectory, setMusicDirectory] = createSignal<string | null>(null);
-  const [files] = createResource(musicDirectory, (dir) => dir ? scanDir(dir) : undefined);
-  
+  const [files] = createResource(musicDirectory, (dir) =>
+    dir ? scanDir(dir) : undefined,
+  );
+
   onMount(() => {
     renderer.useConsole = true;
+    renderer.console.show();
     renderer.setBackgroundColor("#334455");
   });
 
@@ -38,12 +41,14 @@ export const App = () => {
       titleAlignment="center"
       borderStyle="heavy"
     >
-      <Show 
-        when={musicDirectory()} 
+      <Show
+        when={musicDirectory()}
         fallback={<FileSelector onDirectorySelect={handleDirectorySelect} />}
       >
         <box style={{ flexDirection: "row", marginBottom: 1 }}>
-          <text>{cyan("Directory: ")} {musicDirectory()}</text>
+          <text>
+            {cyan("Directory: ")} {musicDirectory()}
+          </text>
           <text onMouseDown={resetDirectory} style={{ marginLeft: 2 }}>
             {yellow("← Change Directory")}
           </text>
@@ -55,10 +60,28 @@ export const App = () => {
         <input onInput={(value) => setNameValue(value)} />
 
         <box style={{ flexDirection: "row", flexGrow: 1, marginTop: 1 }}>
-          <box style={{ flexGrow: 1, flexShrink: 1, flexBasis: 70, marginRight: 1 }}>
-            <SongList files={files} nameValue={nameValue} onSelect={handleSongSelect} />
+          <box
+            style={{
+              flexGrow: 1,
+              flexShrink: 1,
+              flexBasis: 70,
+              marginRight: 1,
+            }}
+          >
+            <SongList
+              files={files}
+              nameValue={nameValue}
+              onSelect={handleSongSelect}
+            />
           </box>
-          <box style={{ flexBasis: 30, flexShrink: 0, flexGrow: 0, borderStyle: "single" }}>
+          <box
+            style={{
+              flexBasis: 30,
+              flexShrink: 0,
+              flexGrow: 0,
+              borderStyle: "single",
+            }}
+          >
             <Preview />
           </box>
         </box>

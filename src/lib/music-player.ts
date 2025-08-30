@@ -2,37 +2,7 @@ import { $ } from "bun";
 import type { Subprocess } from "bun";
 import * as mm from "music-metadata";
 import type { IAudioMetadata, IPicture } from "music-metadata";
-import path from "path";
-
-interface SongMetadata {
-  title?: string;
-  artist?: string;
-  album?: string;
-  albumArtist?: string;
-  year?: number;
-  genre?: string[];
-  duration?: number; // in seconds
-  bitrate?: number;
-  sampleRate?: number;
-  trackNumber?: number;
-  diskNumber?: number;
-  comment?: string[];
-  albumArt?: AlbumArt;
-}
-
-interface AlbumArt {
-  format: string; // 'image/jpeg', 'image/png', etc.
-  data: Buffer;
-  description?: string;
-}
-
-interface PlayerStatus {
-  isPlaying: boolean;
-  currentFile: string | null;
-  metadata: SongMetadata | null;
-  startTime?: Date;
-  elapsedTime?: number; // in seconds
-}
+import type { AlbumArt, PlayerStatus, SongMetadata } from "./types";
 
 class MusicPlayer {
   private currentProcess: Subprocess | null = null;
@@ -69,7 +39,6 @@ class MusicPlayer {
             this.currentMetadata = null;
             this.startTime = null;
             this.currentProcess = null;
-            this.currentPid = null;
           }
         })
         .catch(() => {
@@ -111,7 +80,7 @@ class MusicPlayer {
         sampleRate: metadata.format.sampleRate,
         trackNumber: metadata.common.track?.no ?? 0,
         diskNumber: metadata.common.disk?.no ?? 0,
-        comment: metadata.common.comment ?? [],
+        comment: metadata.common.comment as string[],
         albumArt,
       };
     } catch (error) {
@@ -138,10 +107,20 @@ class MusicPlayer {
         });
       case "linux":
         console.log("Using ffplay for Linux...");
-        return Bun.spawn(["ffplay", "-nodisp", "-autoexit", "-af", `volume=${this.volume}`, filePath], {
-          stdout: "ignore",
-          stderr: "ignore",
-        });
+        return Bun.spawn(
+          [
+            "ffplay",
+            "-nodisp",
+            "-autoexit",
+            "-af",
+            `volume=${this.volume}`,
+            filePath,
+          ],
+          {
+            stdout: "ignore",
+            stderr: "ignore",
+          },
+        );
       case "win32":
         return Bun.spawn(
           [

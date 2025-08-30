@@ -4,9 +4,9 @@ import { yellow, green } from "@opentui/core";
 import { Preview } from "./preview";
 import { SongList } from "./song-list";
 import path from "path";
-import { scanDir } from "../lib/files";
-import { MusicPlayer } from "../lib/music-player";
-import type { PlayerStatus } from "../lib/types";
+import { scanDir } from "../files";
+import { MusicPlayer } from "../music-player";
+import type { PlayerStatus } from "../types";
 
 const MUSIC_DIR = "/media/d2du/d2du/music/songs/complete";
 

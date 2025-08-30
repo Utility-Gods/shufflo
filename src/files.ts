@@ -77,22 +77,20 @@ export async function scanDir(dir: string): Promise<string[]> {
 }
 
 export function readDirectory(dirPath: string) {
-  Effect.tryPromise({
+  return Effect.tryPromise({
     try: async () => {
       const entries = await readdir(dirPath);
       const fileEntries: FileEntry[] = [];
 
+      console.log(`Reading directory: ${dirPath}`, entries.length);
       for (const entry of entries) {
         try {
           if (entry.startsWith(".")) continue;
 
           const fullPath = path.join(dirPath, entry);
-          const bunFile = file(fullPath);
-          const exists = await bunFile.exists();
-
-          if (!exists) continue;
 
           const stats = await Bun.file(fullPath).stat();
+          console.log(`Found file: ${fullPath}`, stats);
           const isDirectory = stats.isDirectory;
 
           fileEntries.push({
@@ -100,7 +98,9 @@ export function readDirectory(dirPath: string) {
             fullPath,
             isDirectory: isDirectory(),
           });
-        } catch {}
+        } catch (e) {
+          console.error(`Error reading fil`, e);
+        }
       }
 
       return fileEntries.sort((a, b) => {

@@ -4,14 +4,20 @@ import { green, yellow, cyan } from "@opentui/core";
 import { SongList } from "./components/song-list";
 import { Preview } from "./components/preview";
 import { FileSelector } from "./components/file-selector";
-import { scanDir } from "./lib/files";
+import { readDirectory } from "./files";
+import { Console, Effect, pipe } from "effect";
 
 export const App = () => {
   const renderer = useRenderer();
   const [nameValue, setNameValue] = createSignal("");
   const [musicDirectory, setMusicDirectory] = createSignal<string | null>(null);
-  const [files] = createResource(musicDirectory, (dir) =>
-    dir ? scanDir(dir) : undefined,
+
+  const [files] = createResource(musicDirectory, (path) =>
+    Effect.runPromise(
+      pipe(readDirectory(path), Effect.tapError(Console.error)),
+    ).catch((e) => {
+      console.error("Error reading directory:", e);
+    }),
   );
 
   onMount(() => {

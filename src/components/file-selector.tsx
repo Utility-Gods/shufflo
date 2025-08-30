@@ -2,8 +2,8 @@ import { createSignal, createResource, Show } from "solid-js";
 import { green, yellow, cyan } from "@opentui/core";
 import { Effect, Console, pipe } from "effect";
 import path from "path";
-import { readDirectory } from "../lib/files";
-import type { FileSelectorProps } from "../lib/types";
+import { readDirectory } from "../files";
+import type { FileSelectorProps } from "../types";
 
 export function FileSelector(props: FileSelectorProps) {
   const [currentPath, setCurrentPath] = createSignal(
@@ -12,7 +12,9 @@ export function FileSelector(props: FileSelectorProps) {
   const [files] = createResource(currentPath, (path) =>
     Effect.runPromise(
       pipe(readDirectory(path), Effect.tapError(Console.error)),
-    ).catch(() => []),
+    ).catch((e) => {
+      console.error("Error reading directory:", e);
+    }),
   );
 
   const handleSelect = (index: number) => {

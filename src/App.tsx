@@ -3,7 +3,6 @@ import {
   onMount,
   createSignal,
   createResource,
-  Show,
   Match,
   createEffect,
   Switch,
@@ -138,11 +137,11 @@ export const App = () => {
           </text>
         </Match>
         <Match when={activeTab() === 2}>
+          <Profile />
           <text>
             Tab 3/6 - Use Left/Right arrows to navigate | Press Ctrl+C to exit |
             D: toggle debug
           </text>
-          <Profile />
         </Match>
       </Switch>
     </box>

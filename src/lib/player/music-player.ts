@@ -11,7 +11,7 @@ class MusicPlayer {
   private currentMetadata: SongMetadata | null = null;
   private startTime: Date | null = null;
   private platform: NodeJS.Platform = process.platform;
-  private volume: number = 0;
+  private volume: number = 1;
 
   async play(filePath: string): Promise<void> {
     // Stop current song if playing

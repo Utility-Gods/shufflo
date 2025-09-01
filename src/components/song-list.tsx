@@ -1,28 +1,36 @@
-import { Show } from "solid-js";
-import type { FileEntry } from "../lib/types";
+import { createEffect, createResource, Show } from "solid-js";
+import { readDirectory } from "../lib/io/files";
 
 interface SongListProps {
-  files: () => FileEntry[] | undefined;
+  dir: string;
   nameValue: () => string;
-  onSelect: (index: number) => void;
 }
 
 export function SongList(props: SongListProps) {
+  const dir = props.dir;
+
+  const [files] = createResource(dir, readDirectory);
+  createEffect(() => {
+    console.log("Effect running...", files());
+  }, files);
+
+  function onSelect(index: number) {
+    console.log("Selected song at index:", index);
+  }
   return (
     <box
-      title={`Songs (${props.files()?.filter((x) => x.name.includes(props.nameValue()))?.length || 0})`}
+      title={`Songs (${files()?.filter((x) => x.name.includes(props.nameValue()))?.length || 0})`}
       style={{
         flexGrow: 1,
         borderStyle: "single",
         titleAlignment: "center",
       }}
     >
-      <Show when={props.files()}>
+      <Show when={files()}>
         <select
           focused
-          onSelect={props.onSelect}
-          options={props
-            .files()
+          onSelect={onSelect}
+          options={files()
             ?.filter((x) => x.name.includes(props.nameValue()))
             ?.map((ex, i) => ({
               name: ex.name,

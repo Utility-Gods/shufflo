@@ -6,11 +6,10 @@ import {
   Match,
   createEffect,
   Switch,
+  Show,
 } from "solid-js";
 
 import { green, yellow, cyan } from "@opentui/core";
-
-import { Console, Effect, pipe } from "effect";
 
 import { SongList } from "./components/song-list";
 import { Preview } from "./components/preview";
@@ -28,11 +27,6 @@ export const App = () => {
     { title: "Choose Directory" },
     { title: "Profile" },
   ];
-
-  const [files] = createResource(musicDirectory, (path) => readDirectory(path));
-  createEffect(() => {
-    console.log("Effect running...", files());
-  }, files);
   onMount(() => {
     renderer.useConsole = true;
     renderer.console.show();
@@ -41,10 +35,6 @@ export const App = () => {
 
   const handleDirectorySelect = (path: string) => {
     setMusicDirectory(path);
-  };
-
-  const handleSongSelect = (index: number) => {
-    console.log("Selected song at index:", index);
   };
 
   const resetDirectory = () => {
@@ -99,11 +89,7 @@ export const App = () => {
                 marginRight: 1,
               }}
             >
-              <SongList
-                files={files}
-                nameValue={nameValue}
-                onSelect={handleSongSelect}
-              />
+              <SongList dir={musicDirectory()} nameValue={nameValue} />
             </box>
             <box
               style={{

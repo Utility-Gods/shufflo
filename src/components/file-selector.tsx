@@ -1,4 +1,4 @@
-import { createSignal, createResource, Show } from "solid-js";
+import { createResource, Show } from "solid-js";
 import { green, yellow, cyan } from "@opentui/core";
 import { useKeyHandler } from "@opentui/solid";
 import path from "path";
@@ -6,10 +6,7 @@ import { readDirectory } from "../lib/io/files";
 import type { FileSelectorProps } from "../lib/types";
 
 export function FileSelector(props: FileSelectorProps) {
-  const [currentPath, setCurrentPath] = createSignal(
-    process.env.HOME || "/home",
-  );
-  const [files] = createResource(currentPath, (path) => readDirectory(path));
+  const [files] = createResource(props.currentPath, (path) => readDirectory(path));
   const handleSelect = (index: number) => {
     const fileList = files();
     if (!fileList || !fileList[index]) return;
@@ -17,27 +14,21 @@ export function FileSelector(props: FileSelectorProps) {
     const selected = fileList[index];
 
     if (selected.isDirectory) {
-      setCurrentPath(selected.fullPath);
+      props.setCurrentPath(selected.fullPath);
     } else {
       props.onDirectorySelect(path.dirname(selected.fullPath));
     }
   };
 
   const goUp = () => {
-    const parent = path.dirname(currentPath());
-    if (parent !== currentPath()) {
-      setCurrentPath(parent);
+    const parent = path.dirname(props.currentPath());
+    if (parent !== props.currentPath()) {
+      props.setCurrentPath(parent);
     }
   };
 
-  const goBack = () => {
-    const parent = path.dirname(currentPath());
-    if (parent !== currentPath()) {
-      setCurrentPath(parent);
-    }
-  };
   const selectCurrentDirectory = () => {
-    props.onDirectorySelect(currentPath());
+    props.onDirectorySelect(props.currentPath());
   };
 
   // Add keyboard handler for 'b' key
@@ -58,7 +49,7 @@ export function FileSelector(props: FileSelectorProps) {
       style={{ flexGrow: 1 }}
     >
       <text>
-        {cyan("Current: ")} {currentPath()}
+        {cyan("Current: ")} {props.currentPath()}
       </text>
 
       <box style={{ flexDirection: "row", marginTop: 1, marginBottom: 1 }}>

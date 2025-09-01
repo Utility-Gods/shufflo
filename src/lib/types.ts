@@ -6,6 +6,8 @@ export interface FileEntry {
 
 export interface FileSelectorProps {
   onDirectorySelect: (path: string) => void;
+  currentPath: () => string;
+  setCurrentPath: (path: string) => void;
 }
 
 export interface SongMetadata {

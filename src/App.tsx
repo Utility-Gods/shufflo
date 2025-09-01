@@ -4,9 +4,7 @@ import {
   createSignal,
   createResource,
   Match,
-  createEffect,
   Switch,
-  Show,
   onCleanup,
 } from "solid-js";
 
@@ -16,7 +14,7 @@ import { SongList } from "./components/song-list";
 import { Preview } from "./components/preview";
 import { FileSelector } from "./components/file-selector";
 import Profile from "./components/profile";
-import { readDirectory, scanDir } from "./lib/io/files";
+import { scanDir } from "./lib/io/files";
 import { MusicPlayer } from "./lib/player/music-player";
 import type { PlayerStatus } from "./lib/types";
 import path from "path";
@@ -25,7 +23,9 @@ export const App = () => {
   const renderer = useRenderer();
   const musicPlayer = new MusicPlayer();
   const [nameValue, setNameValue] = createSignal("");
-  const [musicDirectory, setMusicDirectory] = createSignal<string | null>(null);
+  const [musicDirectory, setMusicDirectory] = createSignal<string | null>(
+    "/media/d2du/d2du/music/Songs/complete",
+  );
   const [currentSongStatus, setCurrentSongStatus] = createSignal<PlayerStatus>({
     isPlaying: false,
     currentFile: null,
@@ -34,8 +34,8 @@ export const App = () => {
   });
   const [albumArtBase64, setAlbumArtBase64] = createSignal<string | null>(null);
   const [currentSongIndex, setCurrentSongIndex] = createSignal(0);
-  const [allMusicFiles] = createResource(musicDirectory, (dir) => 
-    dir ? scanDir(dir) : Promise.resolve([])
+  const [allMusicFiles] = createResource(musicDirectory, (dir) =>
+    dir ? scanDir(dir) : Promise.resolve([]),
   );
 
   const tabs = [
@@ -129,7 +129,9 @@ export const App = () => {
   }
 
   function playNext() {
-    const fileList = allMusicFiles()?.filter((file) => file.includes(nameValue()));
+    const fileList = allMusicFiles()?.filter((file) =>
+      file.includes(nameValue()),
+    );
     if (!fileList || fileList.length === 0) return;
 
     const nextIndex = (currentSongIndex() + 1) % fileList.length;
@@ -142,7 +144,9 @@ export const App = () => {
   }
 
   function playPrevious() {
-    const fileList = allMusicFiles()?.filter((file) => file.includes(nameValue()));
+    const fileList = allMusicFiles()?.filter((file) =>
+      file.includes(nameValue()),
+    );
     if (!fileList || fileList.length === 0) return;
 
     const prevIndex =
@@ -202,9 +206,9 @@ export const App = () => {
                 marginRight: 1,
               }}
             >
-              <SongList 
-                dir={musicDirectory()} 
-                nameValue={nameValue} 
+              <SongList
+                dir={musicDirectory()}
+                nameValue={nameValue}
                 onSelect={handleSongSelect}
                 files={allMusicFiles}
               />
@@ -217,7 +221,7 @@ export const App = () => {
                 borderStyle: "single",
               }}
             >
-              <Preview 
+              <Preview
                 currentSongStatus={currentSongStatus}
                 onPlayPause={() => {
                   musicPlayer.togglePlayPause();
@@ -235,7 +239,11 @@ export const App = () => {
           </text>
         </Match>
         <Match when={activeTab() === 1}>
-          <FileSelector onDirectorySelect={handleDirectorySelect} />
+          <FileSelector
+            onDirectorySelect={handleDirectorySelect}
+            currentPath={() => musicDirectory() || "/media/d2du/d2du/music/Songs/complete"}
+            setCurrentPath={setMusicDirectory}
+          />
           <text>
             Tab 2/6 - Use Left/Right arrows to navigate | Press Ctrl+C to exit |
             D: toggle debug

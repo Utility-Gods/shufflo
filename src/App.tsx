@@ -29,15 +29,7 @@ export const App = () => {
     { title: "Profile" },
   ];
 
-  const [files] = createResource(musicDirectory, (path) =>
-    Effect.runPromise(
-      pipe(readDirectory(path), Effect.tapError(Console.error)),
-    ).catch((e) => {
-      console.error("Error reading directory:", e);
-      return [];
-    }),
-  );
-
+  const [files] = createResource(musicDirectory, (path) => readDirectory(path));
   createEffect(() => {
     console.log("Effect running...", files());
   }, files);

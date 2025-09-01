@@ -1,7 +1,6 @@
 import { Chunk, Data, Effect, pipe, Stream } from "effect";
 import { readdir } from "node:fs/promises";
 import path from "node:path";
-import type { FileEntry } from "../types";
 
 class FileSystemReadError extends Data.TaggedError("FileSystemReadError") {}
 

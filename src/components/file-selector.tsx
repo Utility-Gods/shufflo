@@ -1,6 +1,5 @@
 import { createSignal, createResource, Show } from "solid-js";
 import { green, yellow, cyan } from "@opentui/core";
-import { Effect, Console, pipe } from "effect";
 import path from "path";
 import { readDirectory } from "../lib/io/files";
 import type { FileSelectorProps } from "../lib/types";

@@ -1,5 +1,6 @@
 import { createSignal, createResource, Show } from "solid-js";
 import { green, yellow, cyan } from "@opentui/core";
+import { useKeyHandler } from "@opentui/solid";
 import path from "path";
 import { readDirectory } from "../lib/io/files";
 import type { FileSelectorProps } from "../lib/types";
@@ -39,6 +40,15 @@ export function FileSelector(props: FileSelectorProps) {
     props.onDirectorySelect(currentPath());
   };
 
+  // Add keyboard handler for 'b' key
+  useKeyHandler((key) => {
+    switch (key.name) {
+      case "b":
+        goUp();
+        break;
+    }
+  });
+
   return (
     <box
       title="Select Music Directory"
@@ -53,7 +63,7 @@ export function FileSelector(props: FileSelectorProps) {
 
       <box style={{ flexDirection: "row", marginTop: 1, marginBottom: 1 }}>
         <text onMouseDown={goUp} style={{ marginRight: 2 }}>
-          {yellow("← Parent")}
+          {yellow("← Parent (B)")}
         </text>
         <text onMouseDown={selectCurrentDirectory}>
           {green("✓ Select This Directory")}

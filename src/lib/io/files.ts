@@ -1,92 +1,116 @@
-import { Effect } from "effect";
-import { readdir, stat } from "node:fs/promises";
+import { Chunk, Data, Effect, pipe, Stream } from "effect";
+import { readdir } from "node:fs/promises";
 import path from "node:path";
 import type { FileEntry } from "../types";
 
+class FileSystemReadError extends Data.TaggedError("FileSystemReadError") {}
+
 export async function scanDir(dir: string): Promise<string[]> {
-  const files: string[] = [];
-  let totalEntries = 0;
-  let directoriesFound = 0;
-  let filesSkipped = 0;
+  const scanDirectoryStream = (dir: string) =>
+    Stream.fromEffect(
+      Effect.tryPromise({
+        try: () => readdir(dir, { encoding: "utf8" }),
+        catch: (error) => new FileSystemReadError(),
+      }),
+    );
 
-  async function scanRecursively(currentDir: string, relativePath = "") {
-    try {
-      const entries = await readdir(currentDir, { encoding: "utf8" });
-      console.log(`Scanning ${currentDir}: found ${entries.length} entries`);
-      totalEntries += entries.length;
-
-      for (const entry of entries) {
-        const fullPath = path.join(currentDir, entry);
+  const scaneRecursivelyStream = (
+    dir: string,
+    relativePath = "",
+  ): Stream.Stream<string, FileSystemReadError> =>
+    pipe(
+      scanDirectoryStream(dir),
+      Stream.flatMap(Stream.fromIterable),
+      Stream.map((name) => {
+        return {
+          name,
+        };
+      }),
+      Stream.map((entry) => ({
+        name: entry.name,
+        fullPath: path.join(dir, entry.name),
+      })),
+      Stream.map((entry) => {
         const relativeFilePath = relativePath
-          ? path.join(relativePath, entry)
-          : entry;
+          ? path.join(relativePath, entry.name)
+          : entry.name;
+        return {
+          ...entry,
+          relativePath: relativeFilePath,
+        };
+      }),
+      Stream.flatMap((entry) =>
+        Stream.fromEffect(
+          Effect.tryPromise({
+            try: async () => {
+              const stats = await Bun.file(entry.fullPath).stat();
+              return {
+                ...entry,
+                isDirectory: stats.isDirectory(),
+              };
+            },
+            catch: () => new FileSystemReadError(),
+          }),
+        ),
+      ),
+      Stream.flatMap((entry) =>
+        entry.isDirectory
+          ? scaneRecursivelyStream(entry.fullPath, entry.relativePath)
+          : Stream.make(entry.relativePath),
+      ),
+    );
 
-        try {
-          const stats = await stat(fullPath);
+  const allFiles = await pipe(
+    scaneRecursivelyStream(dir),
+    Stream.runCollect,
+    Effect.map((chunk) => chunk.pipe(Chunk.toArray)),
+    Effect.runPromise,
+  );
 
-          if (stats.isFile()) {
-            files.push(relativeFilePath);
-          } else if (stats.isDirectory()) {
-            directoriesFound++;
-            console.log(`Found directory: ${relativeFilePath}`);
-            await scanRecursively(fullPath, relativeFilePath);
-          }
-        } catch (error) {
-          filesSkipped++;
-          console.warn(`Could not stat ${fullPath}:`, error);
-          continue;
-        }
-      }
-    } catch (error) {
-      console.error(`Error scanning directory ${currentDir}:`, error);
-    }
-  }
-
-  await scanRecursively(dir);
-
-  console.log(`SCAN COMPLETE:`);
-  console.log(`- Total entries examined: ${totalEntries}`);
-  console.log(`- Files added: ${files.length}`);
-  console.log(`- Directories found: ${directoriesFound}`);
-  console.log(`- Files skipped due to errors: ${filesSkipped}`);
-
-  return files.sort();
+  console.log("All files:", allFiles);
+  return allFiles.sort();
 }
 
-export function readDirectory(dirPath: string) {
-  return Effect.tryPromise({
-    try: async () => {
-      const entries = await readdir(dirPath, {});
-      const fileEntries: FileEntry[] = [];
+export async function readDirectory(dirPath: string) {
+  const scanDirectoryStream = pipe(
+    Stream.fromEffect(
+      Effect.tryPromise({
+        try: () => readdir(dirPath, { encoding: "utf8" }),
+        catch: (error) => new FileSystemReadError(),
+      }),
+    ),
+    Stream.flatMap(Stream.fromIterable),
+    Stream.map((name) => {
+      return {
+        name,
+      };
+    }),
+    Stream.map((entry) => ({
+      name: entry.name,
+      fullPath: path.join(dirPath, entry.name),
+    })),
+    Stream.filter((entry) => !entry.name.startsWith(".")),
+    Stream.flatMap((entry) =>
+      Stream.fromEffect(
+        Effect.tryPromise({
+          try: async () => {
+            const stats = await Bun.file(entry.fullPath).stat();
+            return {
+              ...entry,
+              isDirectory: stats.isDirectory(),
+            };
+          },
+          catch: () => new FileSystemReadError(),
+        }),
+      ),
+    ),
+  );
 
-      for (const entry of entries) {
-        console.log(entry);
-        try {
-          if (entry.startsWith(".")) continue;
-
-          const fullPath = path.join(dirPath, entry);
-
-          const stats = await Bun.file(fullPath).stat();
-          console.log(`Found file: ${fullPath}`, stats);
-          const isDirectory = stats.isDirectory();
-
-          fileEntries.push({
-            name: entry,
-            fullPath,
-            isDirectory,
-          });
-        } catch (e) {
-          console.error(`Error reading fil`, e);
-        }
-      }
-
-      return fileEntries.sort((a, b) => {
-        if (a.isDirectory !== b.isDirectory) {
-          return a.isDirectory ? -1 : 1;
-        }
-        return a.name.localeCompare(b.name);
-      });
-    },
-    catch: (error) => new Error(`Failed to read directory: ${error}`),
-  });
+  const allFiles = await pipe(
+    scanDirectoryStream,
+    Stream.runCollect,
+    Effect.map((chunk) => chunk.pipe(Chunk.toArray)),
+    Effect.runPromise,
+  );
+  return allFiles;
 }

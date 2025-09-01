@@ -9,14 +9,7 @@ export function FileSelector(props: FileSelectorProps) {
   const [currentPath, setCurrentPath] = createSignal(
     process.env.HOME || "/home",
   );
-  const [files] = createResource(currentPath, (path) =>
-    Effect.runPromise(
-      pipe(readDirectory(path), Effect.tapError(Console.error)),
-    ).catch((e) => {
-      console.error("Error reading directory:", e);
-    }),
-  );
-
+  const [files] = createResource(currentPath, (path) => readDirectory(path));
   const handleSelect = (index: number) => {
     const fileList = files();
     if (!fileList || !fileList[index]) return;
